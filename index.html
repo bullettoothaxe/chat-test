@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src='/socket.io/socket.io.js'></script>
+<script>
+	var socket = io.connect('http://localhost:8080');
+	window.onunload = function(){socket.disconnect();};
+	window.onload = function(){
+	
+	var field = document.getElementById('field');
+	var form = document.getElementById('form');
+	var content = document.getElementById('content');
+	
+	var name = prompt('Your name','');
+	if(name)
+		socket.emit('hello',{name:name});
+		
+	form.onsubmit = function(){
+		var text = field.value;
+		socket.emit('send',{message:text});
+		return false;
+	};
+	var messages = [];
+	socket.on('message',function(data){
+		if(data.message){
+			messages.push(data.message);
+			var html = '';
+			for(var i=0;i<messages.length;i++){
+				html += messages[i]+'<br/>';
+			}
+			content.innerHTML = html;
+		}else{console.log('Shit happens');}
+	});
+	
+};
+</script>
+</head>
+<div id="content" style="width: 500px; height: 300px; margin: 0 0 20px 0; border: solid 1px #999; overflow-y: scroll;"></div><form id="form" action="" onsubmit="return false"><input id="field" style="width:350px;"><input id="send" value="Послать" type="submit"></form>
+</html>
